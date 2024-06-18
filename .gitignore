@@ -1,0 +1,22 @@
+node_modules/
+.env
+
+# Ignore the virtual environment directory
+env/
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
+# Ignore VSCode settings
+.vscode/
+
+# Ignore log files
+*.log
+
+# Ignore SQLite database files
+*.sqlite3
+
+# Ignore Docker build files
+build/
+

@@ -1,0 +1,6 @@
+[submodule "robectron-app"]
+	path = robectron-app
+	url = https://github.com/aiman997/robectron-app.git
+[submodule "robectron-store"]
+	path = robectron-store
+	url = https://github.com/aiman997/robectron-store.git

@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: yourusername
+      POSTGRES_PASSWORD: yourpassword
+      POSTGRES_DB: yourdatabase
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./robectron-app/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  backend:
+    build:
+      context: ./robectron-app
+      dockerfile: Dockerfile
+    command: uvicorn api.app.main:app --host 0.0.0.0 --port 8000
+    volumes:
+      - ./robectron-app/api:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://yourusername:yourpassword@postgres/yourdatabase
+
+  frontend:
+    build:
+      context: ./robectron-store
+      dockerfile: Dockerfile
+    command: npm start
+    volumes:
+      - ./robectron-store:/app
+      - ./robectron-store:/app/node_modules
+    ports:
+      - "3000:3000"
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  postgres-data:

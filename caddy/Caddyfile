@@ -1,0 +1,4 @@
+robectron.com {
+    reverse_proxy /api/* robectron-app:8000
+    reverse_proxy /* robectron-frontend:3000
+}
