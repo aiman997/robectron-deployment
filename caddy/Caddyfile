@@ -5,4 +5,7 @@ robectron.com, www.robectron.com {
         output stdout
         format console
     }
+    tls {
+        on_demand
+    }
 }
