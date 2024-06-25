@@ -1,11 +1,14 @@
-robectron.com, www.robectron.com {
-    reverse_proxy /api/* backend:8000
-    reverse_proxy /* frontend:3000
+www.robectron.com, robectron.com {
+    tls /etc/ssl/certs/cfcertificate.pem /etc/ssl/private/cfkey.pem
+    root * /usr/share/caddy
+    file_server
     log {
-        output stdout
-        format console
-    }
-    tls {
-        on_demand
+        output file /var/log/caddy/access.log {
+            roll_size 1gb
+            roll_keep 5
+            roll_keep_for 720h
+        }
+        format json
     }
 }
+

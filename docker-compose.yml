@@ -4,12 +4,14 @@ services:
   postgres:
     image: postgres:13
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: database
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./robectron-app/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - webnet
 
   backend:
     build:
@@ -23,7 +25,9 @@ services:
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: postgres://user:password@postgres:5432/database
+      DATABASE_URL: ${DATABASE_URL}
+    networks:
+      - webnet
 
   frontend:
     build:
@@ -36,26 +40,42 @@ services:
       - ./robectron-store:/app
       - /app/node_modules
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=${NODE_ENV}
     stdin_open: true
     tty: true
     depends_on:
       - backend
+    networks:
+      - webnet
 
-  caddy:
-    image: caddy:latest
+  nginx:
+    build: ./nginx
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
+      - ${NGINX_CONF_PATH}:/etc/nginx/nginx.conf
+      - ${NGINX_CONF_D_PATH}:/etc/nginx/conf.d
+      - ${CERTS_PATH}/cfcertificate.pem:/etc/ssl/certs/cfcertificate.pem
+      - ${CERTS_PATH}/cfkey.pem:/etc/ssl/private/cfkey.pem
+      - ${LOG_PATH}:/var/log/nginx
     depends_on:
       - frontend
       - backend
+    environment:
+      HOST: ${HOST}
+      REMOTE_ADDR: ${REMOTE_ADDR}
+      PROXY_ADD_X_FORWARDED_FOR: ${PROXY_ADD_X_FORWARDED_FOR}
+      SCHEME: ${SCHEME}
+      SERVER_PORT: ${SERVER_PORT}
+    networks:
+      - webnet
 
 volumes:
   postgres-data:
-  caddy_data:
-  caddy_config:
+  nginx_data:
+  nginx_config:
+
+networks:
+  webnet:
+    driver: bridge
